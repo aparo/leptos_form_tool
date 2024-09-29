@@ -1,9 +1,10 @@
 use super::FormStyle;
 use crate::controls::{
-    button::ButtonData, checkbox::CheckboxData, heading::HeadingData, hidden::HiddenData,
-    output::OutputData, radio_buttons::RadioButtonsData, select::SelectData, slider::SliderData,
-    spacer::SpacerData, stepper::StepperData, submit::SubmitData, text_area::TextAreaData,
-    text_input::TextInputData, ControlRenderData, UpdateEvent, ValidationState,
+    button::ButtonData, checkbox::CheckboxData, date::DateData, heading::HeadingData,
+    hidden::HiddenData, output::OutputData, radio_buttons::RadioButtonsData, select::SelectData,
+    slider::SliderData, spacer::SpacerData, stepper::StepperData, submit::SubmitData,
+    text_area::TextAreaData, text_input::TextInputData, ControlRenderData, UpdateEvent,
+    ValidationState,
 };
 use leptos::*;
 use std::rc::Rc;
@@ -471,5 +472,39 @@ impl FormStyle for GridFormStyle {
         .into_view();
 
         self.common_component(&control.styles, "slider_parent", view)
+    }
+
+    fn date(
+        &self,
+        control: Rc<ControlRenderData<Self, DateData>>,
+        value_getter: Signal<String>,
+        value_setter: SignalSetter<String>,
+        validation_state: Signal<ValidationState>,
+    ) -> View {
+        let view = view! {
+            <div>
+                <label for=&control.data.name class="form_label">
+                    {control.data.label.as_ref()}
+                </label>
+                <span class="form_error">{move || validation_state.get().take_msg()}</span>
+            </div>
+            <input
+                type="range"
+                id=&control.data.name
+                name=&control.data.name
+                min=control.data.min.clone()
+                max=control.data.max.clone()
+                class="form_input"
+                class=("form_input_invalid", move || validation_state.get().is_err())
+                prop:value=move || value_getter.get()
+                on:input=move |ev| {
+                    let value = event_target_value(&ev);
+                    value_setter.set(value);
+                }
+            />
+        }
+        .into_view();
+
+        self.common_component(&control.styles, "date_parent", view)
     }
 }

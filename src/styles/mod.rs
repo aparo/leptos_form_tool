@@ -1,14 +1,16 @@
+mod flowbite;
 mod grid_form;
 
 use crate::controls::{
-    button::ButtonData, checkbox::CheckboxData, heading::HeadingData, hidden::HiddenData,
-    output::OutputData, radio_buttons::RadioButtonsData, select::SelectData, slider::SliderData,
-    spacer::SpacerData, stepper::StepperData, submit::SubmitData, text_area::TextAreaData,
-    text_input::TextInputData, ControlRenderData, ValidationState,
+    button::ButtonData, checkbox::CheckboxData, date::DateData, heading::HeadingData,
+    hidden::HiddenData, output::OutputData, radio_buttons::RadioButtonsData, select::SelectData,
+    slider::SliderData, spacer::SpacerData, stepper::StepperData, submit::SubmitData,
+    text_area::TextAreaData, text_input::TextInputData, ControlRenderData, ValidationState,
 };
 use leptos::{Signal, SignalSetter, View};
 use std::rc::Rc;
 
+pub use flowbite::{FbFormStyle, FbStyleAttr};
 pub use grid_form::{GFStyleAttr, GridFormStyle};
 
 /// Defines a way to style a form.
@@ -168,6 +170,17 @@ pub trait FormStyle: 'static {
     fn slider(
         &self,
         control: Rc<ControlRenderData<Self, SliderData>>,
+        value_getter: Signal<String>,
+        value_setter: SignalSetter<String>,
+        validation_state: Signal<ValidationState>,
+    ) -> View;
+
+    /// Renders a slider control.
+    ///
+    /// See [`DatetimeData`].
+    fn date(
+        &self,
+        control: Rc<ControlRenderData<Self, DateData>>,
         value_getter: Signal<String>,
         value_setter: SignalSetter<String>,
         validation_state: Signal<ValidationState>,

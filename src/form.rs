@@ -191,6 +191,27 @@ pub trait FormToolData: Clone + 'static {
 
     /// Constructs a [`Form`] for this [`FormToolData`] type.
     ///
+    /// This renders the form as a the leptos_router
+    /// [`Form`](leptos_router::Form)
+    /// component.
+    ///
+    /// For the other ways to construct a [`Form`], see:
+    /// - [`get_form`](Self::get_form)
+    /// - [`get_action_form`](Self::get_action_form)
+    /// - [`get_form_controls`](Self::get_form_controls)
+    fn get_ajax_form<F: Fn(SubmitEvent, RwSignal<Self>) + 'static>(
+        self,
+        on_submit: F,
+        style: Self::Style,
+        context: Self::Context,
+    ) -> Form<Self> {
+        let builder = FormBuilder::new(context);
+        let builder = Self::build_form(builder);
+        builder.build_ajax_form(on_submit, self, style)
+    }
+
+    /// Constructs a [`Form`] for this [`FormToolData`] type.
+    ///
     /// This renders the form without wrapping it in any form html elements.
     /// This can be useful if you want to do that yourself, or if you are
     /// just using the FormData signal for some non-form purpose.

@@ -5,6 +5,7 @@ use std::{fmt::Display, rc::Rc, str::FromStr};
 pub mod button;
 pub mod checkbox;
 pub mod custom;
+pub mod date;
 pub mod group;
 pub mod heading;
 pub mod hidden;

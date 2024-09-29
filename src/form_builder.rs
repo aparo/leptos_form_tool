@@ -391,6 +391,55 @@ impl<FD: FormToolData> FormBuilder<FD> {
     }
 
     /// Builds the action form version of the form.
+    pub(crate) fn build_ajax_form<F: Fn(SubmitEvent, RwSignal<FD>) + 'static>(
+        self,
+        on_submit: F,
+        fd: FD,
+        fs: FD::Style,
+    ) -> Form<FD> {
+        let fd = create_rw_signal(fd);
+        let fs = Rc::new(fs);
+
+        let (views, validation_cbs): (Vec<_>, Vec<_>) = self
+            .render_fns
+            .into_iter()
+            .map(|r_fn| r_fn(fs.clone(), fd))
+            .unzip();
+
+        let elements = fs.form_frame(ControlRenderData {
+            data: views.into_view(),
+            styles: self.styles,
+        });
+
+        let on_submit = move |ev: SubmitEvent| {
+            if ev.default_prevented() {
+                return;
+            }
+            for validation in validation_cbs.iter().flatten() {
+                if !validation() {
+                    ev.prevent_default();
+                    return;
+                }
+            }
+            ev.prevent_default();
+            on_submit(ev, fd);
+        };
+
+        let view = view! {
+            <form class="mx-auto px-4" on:submit=on_submit>
+                {elements}
+            </form>
+        }
+        .into_view();
+
+        Form {
+            fd,
+            validations: self.validations,
+            view,
+        }
+    }
+
+    /// Builds the action form version of the form.
     pub(crate) fn build_action_form<ServFn, F: Fn(SubmitEvent, RwSignal<FD>) + 'static>(
         self,
         action: Action<ServFn, Result<ServFn::Output, ServerFnError<ServFn::Error>>>,
@@ -479,7 +528,7 @@ impl<FD: FormToolData> FormBuilder<FD> {
         };
 
         let view = view! {
-            <Form action=url on:submit=on_submit>
+            <Form  class="mx-auto px-4" action=url on:submit=on_submit>
                 {elements}
             </Form>
         };
